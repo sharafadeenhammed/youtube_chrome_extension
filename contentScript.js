@@ -33,9 +33,11 @@ function secondsToTimeConverter(timeInSeconds = 0) {
 }
 
 async function newVideoLoaded() {
+  console.log("video id from newVideoLoaded: ", currentVideoId);
+  if (currentVideoId) bookmarks = await getBookmarks();
   const bookmarkBtnExists = document.getElementsByClassName("bookmark-btn")[0];
   if (bookmarkBtnExists) return;
-  bookmarks = await getBookmarks();
+  console.log("initial bookmarks: ", bookmarks);
   const newBookmarkBtn = document.createElement("img");
   const bookmarkImage = chrome.runtime.getURL("assets/bookmark.png");
   newBookmarkBtn.classList.add("bookmark-btn");
@@ -48,29 +50,7 @@ async function newVideoLoaded() {
   youtubeLeftVideoControl = youtubeLeftControlsButtons;
   const youtubeMediaPlayer = document.getElementsByClassName("video-stream")[0];
   youtubePlayer = youtubeMediaPlayer;
-  newBookmarkBtn.addEventListener("click", async (event) => {
-    event.preventDefault();
-    await requestStoragePermission();
-    const currentTime = youtubeMediaPlayer.currentTime;
-    const newBookmark = {
-      time: currentTime,
-      desc: `Bookmarked at ${secondsToTimeConverter(currentTime)}`,
-    };
-    bookmarks = await getBookmarks();
-    const stringifiedBookmarksData = JSON.stringify(
-      [...bookmarks, newBookmark].sort((a, b) => a.time - b.time)
-    );
-    console.log("new video bookmark: ", newBookmark);
-    // update video bookmarked list on local storage
-    chrome.storage.sync.set(
-      {
-        [currentVideoId]: stringifiedBookmarksData,
-      },
-      function (...args) {
-        console.log("lcoal storage args: ", args);
-      }
-    );
-  });
+  newBookmarkBtn.addEventListener("click", addBookmarkEventHandeler);
 }
 
 function getBookmarks() {
@@ -89,6 +69,24 @@ async function requestStoragePermission() {
   } catch (error) {
     console.error("Storage access denied:", error);
   }
+}
+
+async function addBookmarkEventHandeler(event) {
+  event.preventDefault();
+  await requestStoragePermission();
+  const currentTime = youtubePlayer.currentTime;
+  const newBookmark = {
+    time: currentTime,
+    desc: `Bookmarked at ${secondsToTimeConverter(currentTime)}`,
+  };
+  // bookmarks = await getBookmarks();
+  console.log("recents bookmarks: ", bookmarks);
+  const stringifiedBookmarksData = JSON.stringify(
+    [...bookmarks, newBookmark].sort((a, b) => a.time - b.time)
+  );
+  console.log("new video bookmark: ", newBookmark);
+  // update video bookmarked list on chrome storage
+  chrome.storage.sync.set({ [currentVideoId]: stringifiedBookmarksData });
 }
 
 function contentScript() {

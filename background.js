@@ -8,7 +8,7 @@ chrome.tabs.onUpdated.addListener((tabId, tab) => {
           type: "NEW",
           videoId: urlParams.get("v"),
         }),
-      3000
+      5000
     );
   }
 });
