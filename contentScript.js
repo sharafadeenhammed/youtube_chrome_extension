@@ -103,5 +103,3 @@ function contentScript() {
 
 contentScript();
 newVideoLoaded();
-// const time = secondsToTimeConverter(3689.99);
-// console.log(time);
