@@ -36,7 +36,13 @@ function viewBookmarks(currentBookmarks = [], activeTab) {
   });
 }
 
-function onPlay(bookmark) {}
+async function onPlay(bookmark) {
+  const tab = await getCurrentActiveTab();
+  chrome.tabs.sendMessage(tab.id, {
+    type: "PLAY",
+    time: bookmark.time,
+  });
+}
 
 function onDelete(bookmark) {
   chrome.storage.sync.get([currentVideoId], (data) => {

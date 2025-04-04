@@ -91,10 +91,14 @@ async function addBookmarkEventHandeler(event) {
 
 function contentScript() {
   chrome.runtime.onMessage.addListener((obj, sender, response) => {
-    const { type, videoId, value } = obj;
+    const { type, videoId, value, time } = obj;
     if (type === "NEW") {
       currentVideoId = videoId;
       newVideoLoaded();
+    } else if (type === "PLAY") {
+      console.log("video id from content script: ", time, videoId);
+      youtubePlayer.currentTime = time;
+      // youtubePlayer.play();
     }
   });
 }
